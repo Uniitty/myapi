@@ -8,16 +8,13 @@ import com.myapi.dto.UserDTO;
 import com.myapi.models.User;
 import com.myapi.repository.UserRepository;
 import com.myapi.services.exceptions.UserBadRequestException;
-import org.junit.Rule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 import java.util.Optional;
@@ -33,14 +30,17 @@ public class UserServiceTest extends ApplicationConfigTest {
     @MockBean
     UserRepository userRepository;
 
-    @Rule
-    public ExpectedException ex = ExpectedException.none();
-
-    @Test()
+    @Test
     public void callBadRequestWhenFirstNameorLastNameIsEmpty()  {
         UserDTO userDTO = Mockito.mock(UserDTO.class);
-        Mockito.doThrow(new UserBadRequestException("")).when(userDTO).getFirstName();
-        Mockito.doThrow(new UserBadRequestException("")).when(userDTO).getLastName();
+        when(userDTO.getFirstName()).thenReturn("");
+        when(userDTO.getLastName()).thenReturn("");
+        assertThrows(UserBadRequestException.class, () -> userService.saveUser(userDTO), "User first name and last name cannot be null or empty");
+    }
+
+    @Test
+    public void callBadRequestWhenUserIdIsNull()  {
+        assertThrows(UserBadRequestException.class, () -> userService.findUserById(null), "Id cannot be null or empty");
     }
 
     @Test
